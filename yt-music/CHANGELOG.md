@@ -10,10 +10,11 @@
 - **Login state detection race**: Added fallback disk verification for `cookies.txt` in UI state initialization, preventing temporary unauthenticated banner flashes during startup.
 - **Download metadata disk writes**: Batched offline metadata saves during bulk playlist queueing instead of writing disk state per item.
 - **Scratch file collisions**: Increased scratch file rotation pool from 8 to 128 slots to prevent concurrent request data overwrites.
+- **Offline library protection**: Prevented library refresh from executing when offline or wiping cached playlists on failed fetches.
 
 ### Added
-- **Manual library refresh**: Added refresh buttons to both the sidebar header and the Library view to trigger instantaneous resync of user playlists and library state.
-- **Stream resolution resilience**: Updated yt-dlp resolver to request `bestaudio/best` with opus extraction and multiple player client fallbacks (`android,mweb`), bypassing YouTube throttling and stream 403 errors.
+- **Manual library refresh**: Added refresh buttons with animated loading spinner states to both the sidebar header and the Library view to trigger instantaneous resync of user playlists and library state.
+- **Stream resolution resilience**: Updated yt-dlp resolver to request `bestaudio/best` with `mweb,web` client fallbacks, bypassing YouTube throttling without unnecessary audio re-encoding.
 - **In-memory thumbnail caching**: Avoids redundant disk stat calls for already resolved thumbnail paths.
 
 ## [0.2.5] - 2026-09-04

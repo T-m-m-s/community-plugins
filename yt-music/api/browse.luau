@@ -34,6 +34,10 @@ local EXPO = {}
 local pending_library: any? = nil
 
 function EXPO.library()
+	if not network.isOnline() then
+		log("library: skipped network call because offline")
+		return
+	end
 	log("library called")
 	local body_json = noctalia.json.encode({ context = CONTEXT.context, browseId = "FEmusic_library_landing" }) or ""
 	local auth = build_auth()
@@ -52,7 +56,7 @@ if [ -s "]=] .. COOKIE_PATH .. [=[" ]; then
   C_ARG="--cookie ]=] .. COOKIE_PATH .. [=["
 fi
 
-curl -4 -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
+curl -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
   -H "Content-Type: application/json" \
   ]=] .. origin_header .. [=[ \
   ]=] .. auth_header .. [=[ \
@@ -102,7 +106,7 @@ echo "STATUS=OK"
 			end
 			pending_library = playlists
 		else
-			pending_library = {}
+			pending_library = false
 		end
 	end, 15000)
 end
@@ -115,7 +119,11 @@ function EXPO.finish_library(cb: (any?, string?) -> ()?)
 	local playlists = pending_library
 	pending_library = nil
 	if cb then
-		cb(playlists or {})
+		if type(playlists) == "table" then
+			cb(playlists)
+		else
+			cb(nil)
+		end
 	end
 end
 
@@ -154,7 +162,7 @@ if [ -s "]=] .. COOKIE_PATH .. [=[" ]; then
   C_ARG="--cookie ]=] .. COOKIE_PATH .. [=["
 fi
 
-curl -4 -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
+curl -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
   -H "Content-Type: application/json" \
   ]=] .. origin_header .. [=[ \
   ]=] .. auth_header .. [=[ \
@@ -255,7 +263,7 @@ if [ -s "]=] .. COOKIE_PATH .. [=[" ]; then
   C_ARG="--cookie ]=] .. COOKIE_PATH .. [=["
 fi
 
-curl -4 -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
+curl -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
   -H "Content-Type: application/json" \
   ]=] .. origin_header .. [=[ \
   ]=] .. auth_header .. [=[ \
@@ -355,7 +363,7 @@ if [ -s "]=] .. COOKIE_PATH .. [=[" ]; then
   C_ARG="--cookie ]=] .. COOKIE_PATH .. [=["
 fi
 
-curl -4 -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
+curl -s -X POST "https://music.youtube.com/youtubei/v1/browse?prettyPrint=false" \
   -H "Content-Type: application/json" \
   ]=] .. origin_header .. [=[ \
   ]=] .. auth_header .. [=[ \

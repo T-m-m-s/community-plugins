@@ -90,7 +90,16 @@ local ACTIONS = {
 		playlist.refresh(r.id or r.playlist_id)
 	end,
 	refresh_library = function(r)
+		if not network.isOnline() then
+			log("refresh_library: skipped because offline")
+			return
+		end
+		if state.refreshing_library then
+			return
+		end
 		if api and api.library then
+			state.refreshing_library = true
+			store.publish()
 			api.library()
 		end
 	end,
@@ -249,16 +258,17 @@ end)
 function update()
 	if api.library_pending() then
 		api.finish_library(function(playlists)
-			state.library = type(playlists) == "table" and playlists or {}
-			store.publish()
-			if type(playlists) == "table" then
+			state.refreshing_library = false
+			if type(playlists) == "table" and #playlists > 0 then
+				state.library = playlists
 				log("ytmusic: loaded " .. #playlists .. " library playlists")
 				noctalia.runAsync("true", function()
 					api.ensure_thumbnails(state.library, store.publish, "library")
 				end)
 			else
-				log("ytmusic: library decode failed")
+				log("ytmusic: library fetch failed or empty, keeping existing library")
 			end
+			store.publish()
 		end)
 	end
 
@@ -268,7 +278,7 @@ function update()
 	if probe_tick >= 20 then
 		probe_tick = 0
 		noctalia.runAsync(
-			"curl -4 -s -o /dev/null -m 6 https://music.youtube.com && echo 'NET=UP' || echo 'NET=DOWN'",
+			"curl -s -o /dev/null -m 6 https://music.youtube.com && echo 'NET=UP' || echo 'NET=DOWN'",
 			function(res)
 				local out = (type(res) == "table" and res.stdout) or ""
 				local now_online = out:find("NET=UP", 1, true) ~= nil

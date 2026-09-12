@@ -135,6 +135,7 @@ local function build_sidebar()
         table.insert(sidebar_items, ui.separator({ key = "sep-recent", color = "outline", spacing = 8 }))
     end
 
+    local is_refreshing_lib = (data.refreshing_library == true)
     table.insert(sidebar_items, ui.row({ key = "label-library", align = "center", justify = "space_between", padding = 6, borderWidth = 0 }, {
         ui.label({
             text = "YOUR LIBRARY",
@@ -144,11 +145,11 @@ local function build_sidebar()
         }),
         ui.button({
             key = "btn-refresh-sidebar-lib",
-            glyph = "refresh",
+            glyph = is_refreshing_lib and "loader" or "refresh",
             variant = "ghost",
             controlSize = "sm",
-            tooltip = "Sync library",
-            onClick = function()
+            tooltip = is_refreshing_lib and "Refreshing library..." or "Sync library",
+            onClick = is_refreshing_lib and nil or function()
                 request("refresh_library", {})
             end
         })

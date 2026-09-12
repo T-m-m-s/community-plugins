@@ -11,6 +11,7 @@ local function build_library()
 
 	local filter = view.library_filter or "all"
 
+	local is_refreshing_lib = (data.refreshing_library == true)
 	table.insert(
 		child,
 		ui.row({ key = "lib-head", align = "center", justify = "space_between" }, {
@@ -24,11 +25,11 @@ local function build_library()
 			}),
 			ui.button({
 				key = "btn-sync-lib-head",
-				glyph = "refresh",
+				glyph = is_refreshing_lib and "loader" or "refresh",
 				variant = "secondary",
 				controlSize = "md",
-				tooltip = "Refresh library",
-				onClick = function()
+				tooltip = is_refreshing_lib and "Refreshing library..." or "Refresh library",
+				onClick = is_refreshing_lib and nil or function()
 					request("refresh_library", {})
 				end,
 			}),
